@@ -156,29 +156,51 @@ th {
 button {
   margin: 5px;
 }
-
-.edit{
-
+.edit {
   cursor: pointer;
-  background:url(../public/edit.jpeg);
-  background-repeat:no-repeat ;
-  background-size:165%;
+  background: url(../public/edit.jpeg);
+  background-repeat: no-repeat;
+  background-size: 165%;
   background-position: -13px;
   border-radius: 50%;
-  border:none;
+  border: none;
   height: 40px;
-  width:40px;
+  width: 40px;
+  position: relative; /* Ensure the button is relative for absolute positioning of pseudo-element */
 }
 
-.delete{
+.edit:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(204, 67, 254, 0.25); /* Adjust opacity and color as needed */
+  border-radius: 50%;
+}
+
+.delete {
   cursor: pointer;
-  background:url(../public/bin.jpeg);
-  background-repeat:no-repeat ;
-  background-size:100%;
+  background: url(../public/bin.jpeg);
+  background-repeat: no-repeat;
+  background-size: 100%;
   background-position: 0px;
   border-radius: 50%;
-  border:none;
+  border: none;
   height: 40px;
-  width:40px;
-
+  width: 40px;
+  position: relative; /* Ensure the button is relative for absolute positioning of pseudo-element */
 }
+
+.delete:hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(204, 67, 254, 0.25); /* Adjust opacity and color as needed */
+  border-radius: 50%;
+}
+
