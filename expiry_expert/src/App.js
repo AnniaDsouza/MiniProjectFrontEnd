@@ -21,6 +21,7 @@ const App = () => {
         <h1 className="gradient-text">Expiry Expert</h1>
       </header>
       <Navbar categories={categories} onCategoryEdit={handleCategoryEdit} />
+      <hr color="black"></hr>
       {isFormVisible && <ProductForm categories={categories} />}
       <button className="floating-button" onClick={handleAddClick}>
         Add
