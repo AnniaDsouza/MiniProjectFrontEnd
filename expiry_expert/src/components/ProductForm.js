@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Tesseract from 'tesseract.js';
 
-const ProductForm = ({ categories }) => {
+const ProductForm = ({ categories, onSubmit, editProduct }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [productName, setProductName] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
@@ -13,6 +13,15 @@ const ProductForm = ({ categories }) => {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (editProduct) {
+      setSelectedCategory(editProduct.category);
+      setProductName(editProduct.name);
+      setExpiryDate(editProduct.expiryDate);
+      setText(editProduct.text);
+    }
+  }, [editProduct]);
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
@@ -66,22 +75,16 @@ const ProductForm = ({ categories }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({
+    const product = {
+      id: editProduct ? editProduct.id : Date.now(),
       category: selectedCategory,
-      productName,
+      name: productName,
       expiryDate,
       image,
       voice,
       text: ocrText || text,
-    });
-    // Optionally, reset the form after submission
-    setSelectedCategory('');
-    setProductName('');
-    setExpiryDate('');
-    setImage(null);
-    setVoice(null);
-    setText('');
-    setOcrText('');
+    };
+    onSubmit(product);
   };
 
   return (

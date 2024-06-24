@@ -50,6 +50,11 @@ nav li {
   color: var(--secondary);
 }
 
+nav li:hover{
+
+  color: var(--primary);
+}
+
 nav li button {
   margin-left: 5px; /* Add some space between the category name and the edit button */
 }
@@ -106,7 +111,7 @@ nav li button {
   width: 60px;
   height: 60px;
   cursor: pointer;
-  font-size: 19px;
+  font-size: 30px;
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -130,5 +135,50 @@ nav li button {
   color: transparent;
 }
 
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
 
+th, td {
+  border: 1px solid white;
+  padding: 8px;
+  text-align: left;
+ 
+}
 
+th {
+  background-color: var(--secondary);
+  color:var(--background);
+}
+
+button {
+  margin: 5px;
+}
+
+.edit{
+
+  cursor: pointer;
+  background:url(../public/edit.jpeg);
+  background-repeat:no-repeat ;
+  background-size:165%;
+  background-position: -13px;
+  border-radius: 50%;
+  border:none;
+  height: 40px;
+  width:40px;
+}
+
+.delete{
+  cursor: pointer;
+  background:url(../public/bin.jpeg);
+  background-repeat:no-repeat ;
+  background-size:100%;
+  background-position: 0px;
+  border-radius: 50%;
+  border:none;
+  height: 40px;
+  width:40px;
+
+}

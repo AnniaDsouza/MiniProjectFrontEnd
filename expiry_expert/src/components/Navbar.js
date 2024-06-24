@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Navbar = ({ categories, onCategoryClick }) => {
+const Navbar = ({ categories, onCategoryClick, onCategoryEdit }) => {
   return (
     <nav>
       <ul>
