@@ -1,18 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Tesseract from 'tesseract.js';
+import React, { useState, useEffect, useRef } from "react";
+import Tesseract from "tesseract.js";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import useClipboard from "react-use-clipboard";
+import "./ProductForm.css"; // Import the CSS file
 
 const ProductForm = ({ categories, onSubmit, editProduct }) => {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [productName, setProductName] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [productName, setProductName] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
   const [image, setImage] = useState(null);
-  const [voice, setVoice] = useState(null);
   const [text, setText] = useState('');
-  const [ocrText, setOcrText] = useState('');
   const [isOcrProcessing, setIsOcrProcessing] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+
+  const [textToCopy, setTextToCopy] = useState('');
+  const [isCopied, setCopied] = useClipboard(textToCopy, { successDuration: 1000 });
+
+  const startListening = () => SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
+  const { transcript, browserSupportsSpeechRecognition, resetTranscript } = useSpeechRecognition();
 
   useEffect(() => {
     if (editProduct) {
@@ -22,6 +29,14 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
       setText(editProduct.text);
     }
   }, [editProduct]);
+
+  useEffect(() => {
+    return () => {
+      if (videoRef.current && videoRef.current.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
@@ -37,23 +52,19 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
 
   const processImage = (image) => {
     setIsOcrProcessing(true);
-    Tesseract.recognize(
-      image,
-      'eng',
-      {
-        logger: (m) => console.log(m),
+    Tesseract.recognize(image, "eng", { logger: (m) => console.log(m) }).then(
+      ({ data: { text } }) => {
+        setProductName(text);
+        setIsOcrProcessing(false);
+        setIsCameraOpen(false);
       }
-    ).then(({ data: { text } }) => {
-      setOcrText(text);
-      setIsOcrProcessing(false);
-      setIsCameraOpen(false);
-    });
+    );
   };
 
   const handleCaptureImage = () => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     canvas.toBlob((blob) => {
       processImage(blob);
@@ -69,8 +80,10 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
     setIsCameraOpen(true);
   };
 
-  const handleVoiceChange = (e) => {
-    setVoice(e.target.files[0]);
+  const handleStopListening = () => {
+    SpeechRecognition.stopListening();
+    setProductName(transcript);
+    resetTranscript();
   };
 
   const handleSubmit = (e) => {
@@ -81,15 +94,18 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
       name: productName,
       expiryDate,
       image,
-      voice,
-      text: ocrText || text,
+      text,
     };
     onSubmit(product);
   };
 
+  if (!browserSupportsSpeechRecognition) {
+    return <p>Your browser does not support speech recognition.</p>;
+  }
+
   return (
-    <div className="product-form">
-      <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="product-form">
+      <div className="form-column">
         <label>
           Category:
           <select value={selectedCategory} onChange={handleCategoryChange}>
@@ -101,7 +117,6 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
             ))}
           </select>
         </label>
-        <br />
         <label>
           Product Name:
           <input
@@ -110,7 +125,6 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
             onChange={(e) => setProductName(e.target.value)}
           />
         </label>
-        <br />
         <label>
           Expiry Date:
           <input
@@ -119,55 +133,44 @@ const ProductForm = ({ categories, onSubmit, editProduct }) => {
             onChange={(e) => setExpiryDate(e.target.value)}
           />
         </label>
-        <br />
         <label>
           Upload Image:
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-          />
+          <input type="file" accept="image/*" onChange={handleImageChange} />
         </label>
-        <br />
         <button type="button" onClick={openCamera}>
           Open Camera
         </button>
         {isCameraOpen && (
-          <div>
+          <div className="camera-container">
             <video ref={videoRef} width="320" height="240" />
             <button type="button" onClick={handleCaptureImage}>
               Capture Image
             </button>
+            <canvas
+              ref={canvasRef}
+              width="320"
+              height="240"
+              className="canvas-container"
+            />
           </div>
         )}
-        <canvas ref={canvasRef} width="320" height="240" style={{ display: 'none' }} />
         {isOcrProcessing && <p>Processing image...</p>}
-        {ocrText && (
-          <div>
-            <h3>Extracted Text:</h3>
-            <p>{ocrText}</p>
+        <div className="container">
+          <div className="main-content" onClick={() => setTextToCopy(transcript)}>
+            {transcript}
           </div>
-        )}
-        <label>
-          Upload Voice Note:
-          <input
-            type="file"
-            accept="audio/*"
-            onChange={handleVoiceChange}
-          />
-        </label>
-        <br />
-        <label>
-          Text Note:
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-          />
-        </label>
-        <br />
+          <div className="btn-style">
+            <button type="button" onClick={startListening}>
+              Start Listening
+            </button>
+            <button type="button" onClick={handleStopListening}>
+              Stop Listening
+            </button>
+          </div>
+        </div>
         <button type="submit">Submit</button>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };
 
