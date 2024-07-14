@@ -24,7 +24,7 @@ body {
 }
 
 header {
-  background: linear-gradient(black, var(--background));
+  background: linear-gradient(rgb(41, 14, 44), var(--background));
   padding: 1px;
 }
 header h1 {
